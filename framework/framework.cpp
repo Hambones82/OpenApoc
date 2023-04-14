@@ -51,6 +51,7 @@ using namespace OpenApoc;
 
 namespace OpenApoc
 {
+static constexpr unsigned SIM_TICKS_PER_REAL_SECOND = 36;
 
 UString Framework::getDataDir() const { return Options::dataPathOption.get(); }
 
@@ -311,10 +312,14 @@ void Framework::run(sp<Stage> initialStage)
 	auto target_frame_duration =
 	    std::chrono::duration<int64_t, std::micro>(1000000 / Options::targetFPS.get());
 
+	auto target_tick_duration =
+	    std::chrono::duration<int64_t, std::micro>(1000000 / SIM_TICKS_PER_REAL_SECOND);
+
 	p->ProgramStages.push(initialStage);
 
 	this->renderer->setPalette(this->data->loadPalette("xcom3/ufodata/pal_06.dat"));
 	auto expected_frame_time = std::chrono::steady_clock::now();
+	auto expected_tick_time = std::chrono::steady_clock::now();
 
 	bool frame_time_limited_warning_shown = false;
 
@@ -346,8 +351,10 @@ void Framework::run(sp<Stage> initialStage)
 		{
 			break;
 		}
+		while (expected_tick_time <= frame_time_now)
 		{
 			p->ProgramStages.current()->update();
+			expected_tick_time += target_tick_duration;
 		}
 
 		for (StageCmd cmd : stageCommands)
