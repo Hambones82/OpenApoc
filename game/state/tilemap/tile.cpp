@@ -122,7 +122,7 @@ bool Tile::getCanStand(bool large)
 	}
 	else
 	{
-		if (canStand)
+ 		if (canStand)
 		{
 			return true;
 		}
