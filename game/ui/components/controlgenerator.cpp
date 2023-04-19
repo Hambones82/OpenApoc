@@ -150,8 +150,15 @@ VehicleTileInfo ControlGenerator::createVehicleInfo(GameState &state, sp<Vehicle
 	// Faded if in other dimension or if haven't left dimension gate yet
 	t.faded = v->city != state.current_city || (!v->tileObject && !v->currentBuilding);
 	// Headed home if we have a mission and it's to our home building
-	t.headedHome = v->missions.back().targetBuilding == v->homeBuilding ||
-	               v->missions.back().type == VehicleMission::MissionType::OfferService;
+	if (!v->missions.empty())
+	{
+		t.headedHome = v->missions.back().targetBuilding == v->homeBuilding ||
+		               v->missions.back().type == VehicleMission::MissionType::OfferService;
+	}
+	else
+	{
+		t.headedHome = false;
+	}
 
 	auto b = v->currentBuilding;
 	if (b)
@@ -186,7 +193,6 @@ sp<Control> ControlGenerator::createVehicleControl(GameState &state, const Vehic
 	baseControl->Size.x -= 1;
 	baseControl->Name = "OWNED_VEHICLE_FRAME_" + info.vehicle->name;
 	baseControl->setData(info.vehicle);
-	baseControl->ToolTipText = info.vehicle->name;
 
 	auto vehicleIcon = baseControl->createChild<Graphic>(info.vehicle->type->icon);
 	if (vehicleIcon->getImage())
@@ -229,6 +235,7 @@ sp<Control> ControlGenerator::createVehicleControl(GameState &state, const Vehic
 	}
 	stateGraphic->Location = {0, 0};
 	stateGraphic->Name = "OWNED_VEHICLE_STATE_" + info.vehicle->name;
+	stateGraphic->ToolTipText = info.vehicle->name;
 
 	if (info.faded)
 	{
@@ -659,13 +666,13 @@ sp<Control> ControlGenerator::createOrganisationControl(GameState &state,
 	// FIXME: There's an extra 1 pixel here that's annoying
 	baseControl->Size.x -= 1;
 	baseControl->Name = "ORG_FRAME_" + info.organisation->name;
-	baseControl->ToolTipText = tr(info.organisation->name);
 	baseControl->setData(info.organisation);
 
-	auto vehicleIcon = baseControl->createChild<Graphic>(info.organisation->icon);
-	vehicleIcon->AutoSize = true;
-	vehicleIcon->Location = {1, 1};
-	vehicleIcon->Name = "ORG_ICON_" + info.organisation->name;
+	auto orgIcon = baseControl->createChild<Graphic>(info.organisation->icon);
+	orgIcon->AutoSize = true;
+	orgIcon->Location = {1, 1};
+	orgIcon->Name = "ORG_ICON_" + info.organisation->name;
+	orgIcon->ToolTipText = tr(info.organisation->name);
 
 	return baseControl;
 }
@@ -709,11 +716,11 @@ void ControlGenerator::fillAgentControl(GameState &state, sp<Graphic> baseContro
 	}
 	baseControl->setImage(singleton.battleSelect[(int)info.selected]);
 	baseControl->setData(info.agent);
-	baseControl->ToolTipText = info.agent->name;
 
 	auto unitIcon = baseControl->createChild<Graphic>(info.agent->getPortrait().icon);
 	unitIcon->AutoSize = true;
 	unitIcon->Location = {2, 1};
+	unitIcon->ToolTipText = info.agent->name;
 
 	if (info.useRank)
 	{
@@ -760,6 +767,7 @@ void ControlGenerator::fillAgentControl(GameState &state, sp<Graphic> baseContro
 		auto stateGraphic = baseControl->createChild<Graphic>(singleton.icons[(int)info.state]);
 		stateGraphic->AutoSize = true;
 		stateGraphic->Location = {0, 0};
+		stateGraphic->ToolTipText = info.agent->name;
 	}
 	if (config().getBool("OpenApoc.NewFeature.AdditionalUnitIcons"))
 	{

@@ -59,6 +59,18 @@ template <> const UString &StateObject<Agent>::getId(const GameState &state, con
 	return emptyString;
 }
 
+StateRef<Agent> AgentGenerator::createInitAgent(GameState &state, StateRef<Organisation> org,
+                                                AgentType::Role role) const
+{
+	std::list<sp<AgentType>> types;
+	for (auto &t : state.agent_types)
+		if (t.second->role == role && t.second->playable && t.second->availableAtTheGameStart)
+			types.insert(types.begin(), t.second);
+	auto type = pickRandom(state.rng, types);
+
+	return createAgent(state, org, {&state, AgentType::getId(state, type)});
+}
+
 StateRef<Agent> AgentGenerator::createAgent(GameState &state, StateRef<Organisation> org,
                                             AgentType::Role role) const
 {
@@ -876,8 +888,23 @@ bool Agent::setMission(GameState &state, AgentMission mission)
 bool Agent::popFinishedMissions(GameState &state)
 {
 	bool popped = false;
-	while (missions.size() > 0 && missions.front().isFinished(state, *this))
+	while (missions.size() > 0)
 	{
+		// Prevent Building Investigator Count < 0
+		if (missions.front().type == AgentMission::MissionType::InvestigateBuilding)
+		{
+			if (!missions.front().isFinished(state, *this, false))
+			{
+				break;
+			}
+		}
+		else
+		{
+			if (!missions.front().isFinished(state, *this))
+			{
+				break;
+			}
+		}
 		LogWarning("Agent %s mission \"%s\" finished", name, missions.front().getName());
 		missions.pop_front();
 		popped = true;
