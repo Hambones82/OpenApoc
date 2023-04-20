@@ -27,8 +27,14 @@ static const OpenApoc::Vec3<float> VELOCITY_SCALE_BATTLE{
 namespace OpenApoc
 {
 
-// FIXME: Alexey Andronov: Does anyone know why we divide by 4 here?
-static const unsigned TICK_SCALE = TICKS_PER_SECOND / 4;
+// The intent of this value, based on commit ace44be is that it represents how much of a tile
+// is traveled through per tick, at some baseline level (maybe velocity of 1 or 36).  
+
+// This value was originally set at 15 and later updated to 36.
+// At some point, Alexey Andronov added a FIXME that said "Does anyone know why we divide by 4 here?"
+// Perhaps this value was never meant to be TICKS_PER_SECOND divided by some other value, but
+// rather a fixed ratio that relates ticks to in-game velocity values.
+static const unsigned TICK_SCALE = 36;  
 
 class Image;
 class TileMap;
