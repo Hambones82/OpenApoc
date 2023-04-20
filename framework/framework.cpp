@@ -51,7 +51,7 @@ using namespace OpenApoc;
 
 namespace OpenApoc
 {
-static constexpr unsigned SIM_TICKS_PER_REAL_SECOND = 36;
+static constexpr unsigned SIM_UPDATES_PER_REAL_SECOND = 36;
 
 UString Framework::getDataDir() const { return Options::dataPathOption.get(); }
 
@@ -313,7 +313,7 @@ void Framework::run(sp<Stage> initialStage)
 	    std::chrono::duration<int64_t, std::micro>(1000000 / Options::targetFPS.get());
 
 	auto target_tick_duration =
-	    std::chrono::duration<int64_t, std::micro>(1000000 / SIM_TICKS_PER_REAL_SECOND);
+	    std::chrono::duration<int64_t, std::micro>(1000000 / SIM_UPDATES_PER_REAL_SECOND);
 
 	p->ProgramStages.push(initialStage);
 
