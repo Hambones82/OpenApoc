@@ -202,15 +202,8 @@ void ListBox::update()
 		{
 			case Orientation::Vertical:
 			{
-				if (ItemSize == 0)
-				{
-					for (const auto &i : Controls)
-						scrollerLength += i->Size.y;
-				}
-				else
-				{
-					scrollerLength += Controls.size() * ItemSize;
-				}
+				for (const auto &i : Controls)
+					scrollerLength += i->Size.y;
 				scrollerLength = scrollerLength > Size.y ? scrollerLength - Size.y : 0;
 				break;
 			}
